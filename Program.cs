@@ -1,17 +1,32 @@
+using futbolperuano.Data;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
+
+// Configurar puerto dinámico (Render)
 var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
 builder.WebHost.UseUrls($"http://*:{port}");
 
-// Add services to the container.
+// Agregar servicios
 builder.Services.AddControllersWithViews();
+
+// Configurar cadena de conexión
+var connectionString = Environment.GetEnvironmentVariable("DefaultConnection") 
+    ?? builder.Configuration.GetConnectionString("DefaultConnection");
+
+// 🚀 Agregado para debug
+Console.WriteLine($"Connection string (debug): {connectionString}");
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseNpgsql(connectionString)
+);
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configurar Middleware HTTP
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -19,11 +34,11 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
 app.UseAuthorization();
 
+// Rutas por defecto
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Player}/{action=Index}/{id?}");
 
 app.Run();
