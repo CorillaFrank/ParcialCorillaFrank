@@ -27,19 +27,20 @@ namespace futbolperuano.Controllers
             return View(jugadores);
         }
 
-      public IActionResult Create()
+        public IActionResult Create()
 {
     return View();
 }
 
 [HttpPost]
-public IActionResult Create(Player player)
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> Create(Player player)
 {
     if (ModelState.IsValid)
     {
-        _context.Players.Add(player);
-        _context.SaveChanges();
-        return RedirectToAction("Index");
+        _context.Add(player);
+        await _context.SaveChangesAsync();
+        return RedirectToAction(nameof(Index));
     }
     return View(player);
 }
